@@ -1,43 +1,43 @@
-//
-//  ViewController.swift
-//  Flix
-//
-//  Created by Danny Dong on 2/11/22.
-//
+    //
+    //  ViewController.swift
+    //  Flix
+    //
+    //  Created by Danny Dong on 2/11/22.
+    //
 
 import UIKit
 import AlamofireImage
 
 
 class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSource {
-
     
-
+    
+    
     @IBOutlet var tableView: UITableView!
     var movies = [[String:Any]]()
     override func viewDidLoad() {
         super.viewDidLoad()
-        // Do any additional setup after loading the view.
+            // Do any additional setup after loading the view.
         tableView.dataSource = self
         tableView.delegate = self
         let url = URL(string: "https://api.themoviedb.org/3/movie/now_playing?api_key=a07e22bc18f5cb106bfe4cc1f83ad8ed")!
         let request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 10)
         let session = URLSession(configuration: .default, delegate: nil, delegateQueue: OperationQueue.main)
         let task = session.dataTask(with: request) { (data, response, error) in
-             // This will run when the network request returns
-             if let error = error {
-                    print(error.localizedDescription)
-             } else if let data = data {
-                    let dataDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
-
+                // This will run when the network request returns
+            if let error = error {
+                print(error.localizedDescription)
+            } else if let data = data {
+                let dataDictionary = try! JSONSerialization.jsonObject(with: data, options: []) as! [String: Any]
+                
                     // TODO: Get the array of movies
                     // TODO: Store the movies in a property to use elsewhere
                     // TODO: Reload your table view data
-                 self.movies = dataDictionary["results"] as! [[String:Any]]
-                 
-                 self.tableView.reloadData()
-
-             }
+                self.movies = dataDictionary["results"] as! [[String:Any]]
+                
+                self.tableView.reloadData()
+                
+            }
         }
         task.resume()
         
@@ -50,7 +50,7 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "MovieCell") as! MovieCell
         
-   
+        
         let movie = movies[indexPath.row]
         let title = movie["title"] as! String
         let synopsis = movie["overview"] as! String
@@ -65,7 +65,23 @@ class ViewController: UIViewController, UITableViewDelegate, UITableViewDataSour
         cell.posterView.af.setImage(withURL: posterUrl)
         return cell
     }
-
-
+    
+    
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+            // Get the new view controller using segue.destination.
+            // Pass the selected object to the new view controller.
+        
+            //        find the selected movie
+        let cell = sender as! UITableViewCell
+        let indexPath = tableView.indexPath(for: cell)!
+        let movie = movies[indexPath.row]
+        
+            //        pass the selected movie to the details view controller
+        let detailsViewController = segue.destination as! MovieDetailViewController
+        detailsViewController.movie = movie
+        
+        // deselects the cell when returning to movie list
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
 }
 
